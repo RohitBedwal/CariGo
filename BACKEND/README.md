@@ -32,3 +32,19 @@ Creates a new user account with the provided information and returns an authenti
         }
 }
 {"token":"string"}//jwt Token
+
+
+User Login
+Endpoint for authenticating existing users.
+
+POST /login
+Description
+Verifies user credentials and returns an authentication token if valid.
+
+Request Body
+
+
+{
+    "email": "string",    // required, valid email format
+    "password": "string"  // required, min 6 characters
+}
