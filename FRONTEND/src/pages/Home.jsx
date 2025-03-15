@@ -4,14 +4,15 @@ import 'remixicon/fonts/remixicon.css'
 
 const Home = () => {
   return (
-    <div>
-      <div className='h-screen w-full justify-between flex flex-col bg-cover bg-[url(./src/images/uberHomePage.jpeg)]' >
-        <img className=' w-[15vh] mt-[7vh] ml-[3vh] ' src="./src/images/uberLogo.png"  alt="" />
-        <div className='bg-slate-200 flex flex-col  '>
-          <h2 className='font-semibold text-[7vw] mt-[5vw] mx-[5vw]'>Get started with Uber</h2>
-          <Link to="/login" className='text-center text-white bg-black mx-[4vw] rounded-lg py-[3vw] my-[7vw]  '>Continue  <i className="ri-arrow-right-line items-end "></i></Link>
+    <div className='sm:flex sm:w-full sm:justify-center sm:bg-slate-300 bg-white'>
+      <div className='h-screen w-full justify-between   flex flex-col bg-cover bg-[url(./src/images/uberHomePage.jpeg)]    sm:w-[400px]    ' >
+        <img className=' w-20 mt-14 ml-6 ' src="./src/images/uberLogo.png"  alt="" />
+        <div className='bg-slate-200 flex flex-col w-full '>
+          <h2 className='font-semibold text-2xl mt-5  mx-5'>Get started with Uber</h2>
+          <Link to="/login" className='text-center text-white bg-black mx-4 rounded-lg py-3 my-7  '>Continue  <i className="ri-arrow-right-line items-end "></i></Link>
         </div>
       </div>
+      
     </div>
   )
 }
