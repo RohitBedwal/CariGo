@@ -42,7 +42,7 @@ const UserSignUp = () => {
       <div className='h-screen w-full flex flex-col justify-between sm:w-[400px] sm:bg-white'>
      <div >
      <div className='h-10 w-full flex mb-10 bg-white text-black'>
-        <h3 className='text-4xl ml-7 '>Uber  </h3>
+        <h3 className='text-4xl ml-7 '>CariGO  </h3>
       </div>
 
       
@@ -66,7 +66,7 @@ const UserSignUp = () => {
      </div>
       <div className='mt-4 mx-5 flex flex-col gap-y-4'>
       <p className='text-sm leading-4 text-center mb-5'>
-      By proceeding, you consent to get calls, WhatsApp or SMS/RCS messages, including by automated means, from Uber and its affiliates to the number provided.
+      By proceeding, you consent to get calls, WhatsApp or SMS/RCS messages, including by automated means, from CariGO and its affiliates to the number provided.
       </p>
       </div>
 

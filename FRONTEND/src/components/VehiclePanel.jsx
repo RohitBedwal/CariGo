@@ -14,7 +14,7 @@ const VehiclePanel = (props) => {
             </div>
             <div onClick={()=>{
                 props.setConfirmVehiclePanel(true);
-                
+                props.setVehicleType('car')
                 props.setVehiclePanel(false)
             }} className='flex w-full border-2 rounded-2xl px-2 mb-3  items-center justify-between '>
             <img className='h-15' src="./src/images/car2.png" alt="" />
@@ -23,25 +23,35 @@ const VehiclePanel = (props) => {
                 <h5 className='text-sm '>2 min away  <i className="ri-user-fill">4</i></h5>
                 <p className='text-sm text-gray-500'>Affordable ,compact rides </p>
                 </div>
-                <h2>₹ 193.20</h2>
+                <h2>₹{props.fair.car}</h2>
             </div>
-            <div className='flex w-full border-2 rounded-2xl px-2  mb-3 items-center justify-between '>
+            <div  onClick={()=>{
+                props.setConfirmVehiclePanel(true);
+                props.setVehicleType('auto')
+                props.setVehiclePanel(false)
+            }}
+             className='flex w-full border-2 rounded-2xl px-2  mb-3 items-center justify-between '>
             <img className='h-15' src="./src/images/car2.png" alt="" />
                 <div className=' w-1/2'>
                 <h4 className='font-medium'>Auto</h4>
                 <h5 className='text-sm '>2 min away  <i className="ri-user-fill">3</i></h5>
                 <p className='text-sm text-gray-500'>Affordable ,compact rides </p>
                 </div>
-                <h2>₹ 123.45</h2>
+                <h2>₹ {props.fair.auto}</h2>
             </div>
-            <div className='flex w-full border-2 rounded-2xl px-2 mb-3  items-center justify-between '>
+            <div  onClick={()=>{
+                props.setConfirmVehiclePanel(true);
+                props.setVehicleType('motorcycle')
+                props.setVehiclePanel(false)
+            }}
+             className='flex w-full border-2 rounded-2xl px-2 mb-3  items-center justify-between '>
             <img className='h-15' src="./src/images/car2.png" alt="" />
                 <div className=' w-1/2'>
                 <h4 className='font-medium'>Bike</h4>
                 <h5 className='text-sm '>2 min away  <i className="ri-user-fill">1</i></h5>
                 <p className='text-sm text-gray-500'>Affordable ,compact rides </p>
                 </div>
-                <h2>₹ 63.40</h2>
+                <h2>₹ {props.fair.motorcycle}</h2>
             </div>
         </div>
 

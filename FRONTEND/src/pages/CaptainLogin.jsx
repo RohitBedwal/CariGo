@@ -34,7 +34,7 @@ const CaptainLogin = () => {
       <div className='h-screen w-full flex flex-col justify-between sm:w-[400px]  sm:bg-white  '>
      <div >
      <div className='h-15 w-full flex mb-10 bg-white text-black'>
-        <h3 className='text-4xl ml-7 '>Uber <i className="ri-arrow-right-line items-end "></i></h3>
+        <h3 className='text-4xl ml-7 '>CariGO <i className="ri-arrow-right-line items-end "></i></h3>
       </div>
       <form onSubmit={(e)=>submitHandler(e)}   className='mt-4 mx-5 flex flex-col gap-y-4'>
          <h3 className='font-semibold'> What's  your Email  :</h3>

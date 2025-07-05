@@ -1,6 +1,7 @@
 import React from 'react'
 
 const ConfirmVehiclePanel = (props) => {
+  console.log(props.vehicleType)
   return (
     <div className='sm:flex  sm:w-full  sm:bg-[#cbd5e1] '>
         <div className='sm:w-[400px] sm:bg-white '>
@@ -16,7 +17,7 @@ const ConfirmVehiclePanel = (props) => {
           <div className='p-6'><i className="ri-map-pin-range-fill"></i></div>
           <div className='border-b-2 pb-2 border-gray-300 w-full'>
             <h2 className='font-bold text-xl'>A-542/P</h2>
-            <h3>West vinod nagar ,New Delhi</h3>
+            <h3>{props.pickup}</h3>
           </div>
         </div>
 
@@ -24,13 +25,13 @@ const ConfirmVehiclePanel = (props) => {
           <div className='p-6'><i className="ri-square-fill"></i></div>
           <div className='border-b-2 pb-2 border-gray-300 w-full'>
             <h2 className='font-bold text-xl'>c-42</h2>
-            <h3>New York City,USA</h3>
+            <h3>{props.destination}</h3>
           </div>
         </div>
         <div className='flex items-center justify-start '>
           <div className='p-6'><i className="ri-square-fill"></i></div>
           <div className='border-b-2 pb-2 border-gray-300 w-full'>
-            <h2 className='font-bold text-xl'>₹193.5</h2>
+            <h2 className='font-bold text-xl'>₹ {props.fair[props.vehicleType]}</h2>
             <h3>Cash Cash</h3>
           </div>
         </div>

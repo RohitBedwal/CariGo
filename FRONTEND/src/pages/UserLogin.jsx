@@ -35,7 +35,7 @@ const UserLogin = () => {
      <div className='h-screen w-full flex flex-col justify-between  sm:w-[400px]  sm:bg-white '>
      <div >
      <div className='h-15 w-full flex mb-10 bg-white text-black'>
-        <h3 className='text-4xl ml-7 '>Uber</h3>
+        <h3 className='text-4xl ml-7 '>CariGO</h3>
       </div>
       <form onSubmit={(e)=>submitHandler(e)}   className='mt-5 mx-5 flex flex-col gap-y-4'>
          <h3 className='font-semibold'> What's your Email  :</h3>
