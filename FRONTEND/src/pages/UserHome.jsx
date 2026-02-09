@@ -2,6 +2,7 @@ import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import React, { useEffect, useRef, useState } from 'react';
 import 'remixicon/fonts/remixicon.css';
+import MapView from '../components/MapView';
 import LocationSearchPanel from '../components/LocationSearchPanel';
 import VehiclePanel from '../components/VehiclePanel';
 import ConfirmVehiclePanel from '../components/ConfirmVehiclePanel';
@@ -24,6 +25,9 @@ const UserHome = () => {
     const lookingVehiclePanelRef = useRef(null);
     const [waitingForDriverPanel, setWatingForDriverPanel] = useState(false);
     const waitingForDriverRef = useRef(null);
+    const [activeRide, setActiveRide] = useState(null);
+    const [paymentPanel, setPaymentPanel] = useState(false);
+    const paymentPanelRef = useRef(null);
 
     const [pickupLocation, setPickupLocation] = useState([]);
     const [destinationLocation, setDestinationLocation] = useState([]);
@@ -66,6 +70,12 @@ const UserHome = () => {
             transform: waitingForDriverPanel ? 'translateY(0%)' : 'translateY(100%)'
         });
     }, [waitingForDriverPanel]);
+
+    useGSAP(() => {
+        gsap.to(paymentPanelRef.current, {
+            transform: paymentPanel ? 'translateY(0%)' : 'translateY(100%)'
+        });
+    }, [paymentPanel]);
 
     // API Call for Pickup
     async function getPickupLocation(e) {
@@ -119,16 +129,60 @@ const UserHome = () => {
     }, [vehiclePanel, pickup, destination]);
 
     async function createRide(){
-        const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/ride/create`,{
-            pickup,
-            destination,
-            vehicleType
-        },
-        {
-            headers: { Authorization: `Bearer ${localStorage.getItem('tokrn')}`}
+        try{
+            const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/ride/create`,{
+                pickup,
+                destination,
+                vehicleType
+            },
+            {
+                headers: { Authorization: `Bearer ${localStorage.getItem('token')}`}
 
-        })
+            })
+            // On success, show the "Looking for Driver" panel
+            setLookingVehiclePanel(true);
+            setConfirmVehiclePanel(false);
+            // Begin polling for active ride
+            setWatingForDriverPanel(false);
+        }catch(err){
+            console.error('Error creating ride:', err);
+        }
     }
+
+    // Poll for active ride; when accepted, show waiting panel with OTP
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+        const interval = setInterval(async () => {
+            try {
+                const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/ride/active`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                if (res.status === 200) {
+                    const ride = res.data;
+                    setActiveRide(ride);
+                    if (ride.status === 'accepted') {
+                        setLookingVehiclePanel(false);
+                        setWatingForDriverPanel(true);
+                        setPaymentPanel(false);
+                    }
+                    if (ride.status === 'ongoing') {
+                        setLookingVehiclePanel(false);
+                        setWatingForDriverPanel(true);
+                        setPaymentPanel(false);
+                    }
+                    if (ride.status === 'completed') {
+                        setLookingVehiclePanel(false);
+                        setWatingForDriverPanel(false);
+                        setPaymentPanel(true);
+                    }
+                }
+            } catch (err) {
+                // 204 no content or transient errors; ignore
+            }
+        }, 3000);
+        return () => clearInterval(interval);
+    }, []);
     // Submit handler
     function submitHandler(e) {
         e.preventDefault();
@@ -137,11 +191,11 @@ const UserHome = () => {
     return (
         <div className='sm:flex sm:w-full sm:justify-center sm:bg-slate-300 bg-white'>
             <div className='relative sm:w-[400px] sm:bg-white'>
-                <div className='h-screen w-full absolute'>
-                    <img className='h-full w-full object-cover' src="./src/images/map.png" alt="Map" />
+                <div className='h-screen w-full absolute z-0'>
+                    <MapView pickup={pickup} destination={destination} />
                 </div>
-                <div className='flex flex-col absolute justify-end w-full h-screen'>
-                    <div className='relative bg-white w-full p-5 h-[30%]'>
+                <div className='flex flex-col absolute justify-end w-full h-screen pointer-events-none'>
+                    <div className='relative bg-white w-full p-5 h-[30%] pointer-events-auto'>
                         <h4 className='font-semibold text-2xl pb-3'>Find a trip</h4>
                         <h5 onClick={() => setOpen(false)} ref={closePanelRef} className='absolute opacity-0 right-8 text-2xl top-5'>
                             <i className="ri-arrow-down-wide-fill"></i>
@@ -162,7 +216,7 @@ const UserHome = () => {
                         </form>
                     </div>
 
-                    <div ref={panelRef} className='w-full bg-white'>
+                    <div ref={panelRef} className='w-full bg-white pointer-events-auto'>
                         <LocationSearchPanel
                             suggestions={activeField === 'pickup' ? pickupLocation : destinationLocation}
                             setOpen={setOpen}
@@ -174,24 +228,37 @@ const UserHome = () => {
                         />
                     </div>
 
-                    <div ref={vehiclePanelRef} className='fixed translate-y-full bottom-0 w-full z-10 bg-white sm:p-0 p-5'>
+                    <div ref={vehiclePanelRef} className='fixed translate-y-full bottom-0 w-full z-10 bg-white sm:p-0 p-5 pointer-events-auto'>
                         <VehiclePanel setVehicleType={setVehicleType} destination={destination} pickup={pickup} fair={fair} setVehiclePanel={setVehiclePanel} setConfirmVehiclePanel={setConfirmVehiclePanel} />
                     </div>
 
-                    <div ref={ConfirmVehiclePanelRef} className='fixed translate-y-full bottom-0 w-full z-30 bg-white'>
-                        <ConfirmVehiclePanel vehicleType={vehicleType} destination={destination} pickup={pickup} fair={fair} setConfirmVehiclePanel={setConfirmVehiclePanel} setLookingVehiclePanel={setLookingVehiclePanel} />
+                    <div ref={ConfirmVehiclePanelRef} className='fixed translate-y-full bottom-0 w-full z-30 bg-white pointer-events-auto'>
+                        <ConfirmVehiclePanel onConfirm={createRide} vehicleType={vehicleType} destination={destination} pickup={pickup} fair={fair} setConfirmVehiclePanel={setConfirmVehiclePanel} setLookingVehiclePanel={setLookingVehiclePanel} />
                     </div>
 
-                    <div ref={lookingVehiclePanelRef} className='fixed bottom-0 translate-y-full w-full z-30 bg-white'>
+                    <div ref={lookingVehiclePanelRef} className='fixed bottom-0 translate-y-full w-full z-30 bg-white pointer-events-auto'>
                         <LookingForDriver vehicleType={vehicleType} destination={destination} pickup={pickup} fair={fair} setLookingVehiclePanel={setLookingVehiclePanel} />
                     </div>
 
-                    <div ref={waitingForDriverRef} className='fixed translate-y-full bottom-0 w-full z-30 bg-white'>
-                        <WaitingForDriver />
+                    <div ref={waitingForDriverRef} className='fixed translate-y-full bottom-0 w-full z-30 bg-white pointer-events-auto'>
+                        <WaitingForDriver ride={activeRide} />
                     </div>
 
-                    <div className='fixed translate-y-full bottom-0 w-full z-30 bg-white'>
-                        <PaymentPage />
+                    <div ref={paymentPanelRef} className='fixed translate-y-full bottom-0 w-full z-30 bg-white pointer-events-auto'>
+                        <PaymentPage ride={activeRide} onPay={async ()=>{
+                            try{
+                                const token = localStorage.getItem('token');
+                                await axios.post(`${import.meta.env.VITE_BASE_URL}/ride/pay`,{ rideId: activeRide?._id },{ headers: { Authorization: `Bearer ${token}` } });
+                                // Close payment panel
+                                setPaymentPanel(false);
+                                setActiveRide(null);
+                                // Reload and go to user home page
+                                window.location.href = '/userHome';
+                            }catch(err){
+                                // Could show a toast; keep simple for now
+                                console.error('Payment failed', err);
+                            }
+                        }} />
                     </div>
                 </div>
             </div>

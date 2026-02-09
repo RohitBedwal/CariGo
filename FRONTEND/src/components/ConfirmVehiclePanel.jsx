@@ -38,8 +38,13 @@ const ConfirmVehiclePanel = (props) => {
 
       <div className='flex items-center justify-center w-full'>
         <button onClick={()=>{
-          props.setLookingVehiclePanel(true);
-          props.setConfirmVehiclePanel(false)
+          if (typeof props.onConfirm === 'function') {
+            props.onConfirm();
+          } else {
+            // Fallback to previous behavior if handler not provided
+            props.setLookingVehiclePanel(true);
+            props.setConfirmVehiclePanel(false)
+          }
         }} className=' rounded-lg bg-green-400 text-white font-semibold text-lg p-1.5 m-2 w-full'>Confirm</button>
       </div>
         </div>

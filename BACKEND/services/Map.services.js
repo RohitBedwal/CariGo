@@ -37,33 +37,63 @@ module.exports.getTheDistanceTime = async (origin, destination) => {
     }
 
     const apiKey = process.env.GOOGLE_MAP_API;
-    console.log()
-    const url = `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${encodeURIComponent(origin)}&destinations=${encodeURIComponent(destination)}&key=${apiKey}`;
 
-    const response = await axios.get(url);
-    const data = response.data;
-    // console.log(response)
+    // First attempt: use raw addresses
+    const addrUrl = `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${encodeURIComponent(origin)}&destinations=${encodeURIComponent(destination)}&mode=driving&key=${apiKey}`;
+    const addrResponse = await axios.get(addrUrl);
+    const addrData = addrResponse.data;
+    console.log("DistanceMatrix (addresses) data", addrData);
+
     try {
+        if (addrData.status === "OK") {
+            const element = addrData.rows?.[0]?.elements?.[0];
 
-        
-
-        if (data.status === "OK") {
-            const element = data.rows[0]?.elements[0];
-
-            if (!element || element.status === "ZERO_RESULTS") {
-                throw new Error("No results found for the given locations.");
+            if (element && element.status === "OK") {
+                return {
+                    distance: element.distance.text,
+                    duration: element.duration.text,
+                    distanceValue: element.distance.value,
+                    durationValue: element.duration.value
+                };
             }
 
-            return {
-                distance: element.distance.text,
-                duration: element.duration.text,
-                distanceValue: element.distance.value, // in meters
-                durationValue: element.duration.value  // in seconds
-            };
-        } else {
-            throw new Error("Unable to get distance or time from API: " + data.status);
+            // If Google returns ZERO_RESULTS or NOT_FOUND on elements, try with geocoded lat,lng
+            if (!element || ["ZERO_RESULTS", "NOT_FOUND"].includes(element?.status)) {
+                const [origCoords, destCoords] = await Promise.all([
+                    module.exports.getMapCordinates(origin),
+                    module.exports.getMapCordinates(destination)
+                ]);
+
+                if (!origCoords || !destCoords) {
+                    throw new Error("Failed to geocode one or both addresses");
+                }
+
+                const coordUrl = `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${origCoords.ltd},${origCoords.lng}&destinations=${destCoords.ltd},${destCoords.lng}&mode=driving&key=${apiKey}`;
+                const coordResponse = await axios.get(coordUrl);
+                const coordData = coordResponse.data;
+                console.log("DistanceMatrix (coordinates) data", coordData);
+
+                if (coordData.status === "OK") {
+                    const coordEl = coordData.rows?.[0]?.elements?.[0];
+                    if (coordEl && coordEl.status === "OK") {
+                        return {
+                            distance: coordEl.distance.text,
+                            duration: coordEl.duration.text,
+                            distanceValue: coordEl.distance.value,
+                            durationValue: coordEl.duration.value
+                        };
+                    }
+                    throw new Error("Unable to find a route between coordinates: " + (coordEl?.status || coordData.status));
+                }
+                throw new Error("Distance Matrix error (coordinates): " + coordData.status);
+            }
+
+            // If element exists but is not OK and not covered above
+            throw new Error("Unable to get distance or time from API: " + (element?.status || addrData.status));
         }
 
+        // Top-level API status not OK
+        throw new Error("Distance Matrix error: " + addrData.status);
     } catch (error) {
         console.error("API Error:", error.message);
         throw error;

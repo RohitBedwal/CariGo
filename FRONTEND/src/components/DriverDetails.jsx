@@ -1,6 +1,24 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
+import axios from 'axios'
 
 const DriverDetails = () => {
+  const [earnings, setEarnings] = useState(null);
+  useEffect(()=>{
+    const token = localStorage.getItem('token');
+    if(!token) return;
+    (async ()=>{
+      try{
+        const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/captain/earnings`,{
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if(res.status === 200){
+          setEarnings(res.data.total);
+        }
+      }catch(err){
+        // ignore errors for now
+      }
+    })();
+  },[])
   return (
     <div>
         <div className='  flex items-center justify-between border-b-2 p-4 border-gray-300'>
@@ -9,7 +27,7 @@ const DriverDetails = () => {
             <h2 className='font-semibold text-lg'>Ankit Gari</h2>
           </div>
           <div className='flex flex-col  text-end'>
-            <h5 className='text-xl font-bold '>₹500.32</h5>
+            <h5 className='text-xl font-bold '>₹{earnings !== null ? earnings.toFixed(2) : '—'}</h5>
             <p className='text-sm text-gray-500'>Earned</p>
           </div>
         </div>

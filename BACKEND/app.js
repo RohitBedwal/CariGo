@@ -18,7 +18,7 @@ app.use(express.urlencoded({extended:true}))
 app.use(cookieParser())
 
 app.get('/',(req,res)=>{
-    res.send("hello world")
+    res.send("server is running")
 })
 app.use('/user', userRoutes);
 app.use('/captain',captainRoutes);

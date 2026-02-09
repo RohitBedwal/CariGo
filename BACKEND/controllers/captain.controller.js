@@ -3,6 +3,7 @@ const captainServices = require("../services/captain.services");
 const {validationResult} = require('express-validator');
 const cookieParser = require('cookie-parser');
 const blacklistTokenModel = require("../models/blacklistToken.model");
+const rideModel = require("../models/ride.models");
 
 module.exports.registerCaptain = async (req,res,next)=>{
     const errors = validationResult(req);
@@ -61,4 +62,17 @@ module.exports.logoutCaptain = async (req,res,next)=>{
     await blacklistTokenModel.create({token})
     res.clearCookie('token')
     return res.status(200).json({message:'logged out'})
+}
+
+module.exports.getEarnings = async (req, res) => {
+    try {
+        const total = await rideModel.aggregate([
+            { $match: { captain: req.captain._id, status: 'completed', fare: { $ne: null } } },
+            { $group: { _id: null, total: { $sum: '$fare' } } }
+        ]);
+        const amount = total[0]?.total || 0;
+        return res.status(200).json({ total: amount });
+    } catch (err) {
+        return res.status(500).json({ message: 'Failed to fetch earnings' });
+    }
 }

@@ -1,8 +1,34 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
+import React, { useEffect } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import 'remixicon/fonts/remixicon.css'
 
 const Home = () => {
+  const navigate = useNavigate();
+  useEffect(()=>{
+    const token = localStorage.getItem('token');
+    if(!token) return;
+    // Try user profile first
+    fetch(`${import.meta.env.VITE_BASE_URL}/user/profile`,{
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    .then((res)=>{
+      if(res.status === 200){
+        navigate('/userHome');
+      }else{
+        // Try captain profile
+        fetch(`${import.meta.env.VITE_BASE_URL}/captain/profile`,{
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        .then((cres)=>{
+          if(cres.status === 200){
+            navigate('/captainHome');
+          }
+        })
+        .catch(()=>{})
+      }
+    })
+    .catch(()=>{})
+  },[])
   return (
     <div className='sm:flex sm:w-full sm:justify-center sm:bg-slate-300 bg-white'>
       <div className='h-screen w-full justify-between   flex flex-col bg-cover bg-[url(./src/images/CariGOHomePage.jpeg)]    sm:w-[400px]    ' >

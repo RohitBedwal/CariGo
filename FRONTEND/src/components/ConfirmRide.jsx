@@ -1,15 +1,23 @@
 import React, { useState } from 'react'
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const ConfirmRide = (props) => {
 
     const [otp ,setOtp] = useState();
+  const navigate = useNavigate();
     function submitHandler(e){
         e.preventDefault();
-
-        console.log(otp)
-
-        setOtp('');
+    if (typeof props.onStart === 'function') {
+      Promise.resolve(props.onStart(otp))
+      .then((ok)=>{
+        if (ok !== false) {
+          props.setConfirmRide(false)
+          navigate('/captain-riding')
+        }
+      })
+      .catch(()=>{})
+    }
+    setOtp('');
 
     }
 
@@ -40,14 +48,14 @@ const ConfirmRide = (props) => {
             submitHandler(e)
           }} action="">
             <div className='flex items-center justify-center m-3' >
-            <input onChange={(e)=>{setOtp(e.target.value)}} value={otp} className='w-70% text-center p-2  rounded  bg-gray-200' type="number"  placeholder='enter Otp'/>
+            <input onChange={(e)=>{setOtp(e.target.value)}} value={otp} className='w-70% text-center p-2  rounded  bg-gray-200' type="text" inputMode="numeric" pattern="[0-9]*" placeholder='enter OTP'/>
             </div>
 
             <div className='flex items-center justify-center w-full'>
         <button onClick={()=>{
-            props.setConfirmRide(false)
+          props.setConfirmRide(false)
         }} className=' rounded-lg bg-red-400 text-white font-semibold text-lg p-1.5 m-2 w-full'>cancel</button>
-        <Link to="/captain-riding" className=' rounded-lg bg-green-400 text-center text-white font-semibold text-lg p-1.5 m-2 w-full'>Confirm</Link>
+        <button type="submit" className=' rounded-lg bg-green-400 text-center text-white font-semibold text-lg p-1.5 m-2 w-full'>Confirm</button>
       </div>
 
           </form>
