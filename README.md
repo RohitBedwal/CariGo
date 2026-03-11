@@ -1,6 +1,6 @@
 # CariGo
 
-Full-stack ride-hailing / cab booking (Uber-clone style) project.
+Full-stack ride-hailing / cab booking project.
 
 ## Tech Stack
 
